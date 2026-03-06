@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Take Charge | Mobile CFO</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        background: 'hsl(var(--background))',
+                        foreground: 'hsl(var(--foreground))',
+                        card: 'hsl(var(--card))',
+                        'card-foreground': 'hsl(var(--card-foreground))',
+                        border: 'hsl(var(--border))',
+                        input: 'hsl(var(--input))',
+                        primary: 'hsl(var(--primary))',
+                        'primary-foreground': 'hsl(var(--primary-foreground))',
+                        destructive: 'hsl(var(--destructive))',
+                        'destructive-foreground': 'hsl(var(--destructive-foreground))',
+                        muted: 'hsl(var(--muted))',
+                        'muted-foreground': 'hsl(var(--muted-foreground))',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                    },
+                    borderRadius: { lg: 'var(--radius)', md: 'calc(var(--radius) - 2px)', sm: 'calc(var(--radius) - 4px)' }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer base {
+            :root {
+                --background: 0 0% 100%;
+                --foreground: 222.2 84% 4.9%;
+                --card: 0 0% 100%;
+                --card-foreground: 222.2 84% 4.9%;
+                --border: 214.3 31.8% 91.4%;
+                --input: 214.3 31.8% 91.4%;
+                --primary: 221.2 83.2% 53.3%;
+                --primary-foreground: 210 40% 98%;
+                --destructive: 0 84.2% 60.2%;
+                --destructive-foreground: 210 40% 98%;
+                --muted: 210 40% 96.1%;
+                --muted-foreground: 215.4 16.3% 46.9%;
+                --radius: 0.75rem;
+            }
+            .dark {
+                --background: 222.2 84% 4.9%;
+                --foreground: 210 40% 98%;
+                --card: 222.2 84% 4.9%;
+                --card-foreground: 210 40% 98%;
+                --border: 217.2 32.6% 17.5%;
+                --input: 217.2 32.6% 17.5%;
+                --primary: 217.2 91.2% 59.8%;
+                --primary-foreground: 222.2 47.4% 11.2%;
+                --destructive: 0 62.8% 30.6%;
+                --destructive-foreground: 210 40% 98%;
+                --muted: 217.2 32.6% 17.5%;
+                --muted-foreground: 215 20.2% 65.1%;
+            }
+            body { @apply bg-background text-foreground antialiased selection:bg-primary/20; }
+        }
+
+        /* shadcn style components */
+        .card-ui { @apply rounded-xl border bg-card text-card-foreground shadow-sm; }
+        .btn-ui { @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2; }
+        .btn-primary { @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm; }
+        .btn-outline { @apply border border-input bg-background hover:bg-muted hover:text-foreground; }
+        .btn-ghost { @apply hover:bg-muted hover:text-foreground; }
+        .btn-destructive { @apply bg-destructive text-destructive-foreground hover:bg-destructive/90; }
+        .input-ui { @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50; }
+        
+        /* iPhone specific tweaks */
+        input[type="date"]::-webkit-inner-spin-button, input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0; width: 100%; height: 100%; position: absolute; left: 0; top: 0; cursor: pointer; }
+        .table-container { @apply w-full overflow-x-auto overflow-y-hidden rounded-md border; -webkit-overflow-scrolling: touch; }
+        
+        /* Hide scrollbar for clean mobile look */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { @apply bg-muted-foreground/30 rounded-full; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <script>
+        const GOOGLE_DRIVE_FOLDER_LINK = "https://drive.google.com/drive/my-drive"; // <--- PASTE YOUR LINK HERE
+    </script>
+
+    <div class="max-w-3xl mx-auto p-4 space-y-6">
+        
+        <header class="flex items-center justify-between py-2">
+            <h1 class="text-xl font-bold tracking-tight">Take Charge</h1>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()" class="btn-ui btn-ghost px-2">
+                    <i data-lucide="moon" id="themeIcon" class="w-5 h-5"></i>
+                </button>
+                <button onclick="showBackupModal()" class="btn-ui btn-outline px-3 shadow-sm">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i> Backup
+                </button>
+            </div>
+        </header>
+
+        <div class="flex items-center justify-between">
+            <select id="monthSelect" onchange="changeMonth()" class="text-lg font-bold bg-transparent border-none focus:ring-0 p-0 pr-4 text-foreground"></select>
+            <button onclick="createNewMonth()" class="btn-ui btn-ghost text-primary text-sm">
+                <i data-lucide="plus" class="w-4 h-4 mr-1"></i> New
+            </button>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="card-ui p-4 flex flex-col justify-center">
+                <span class="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Income</span>
+                <span id="dashIncome" class="text-xl font-bold">₹0</span>
+            </div>
+            <div class="card-ui p-4 flex flex-col justify-center">
+                <span class="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Spent</span>
+                <span id="dashExpenses" class="text-xl font-bold">₹0</span>
+            </div>
+            <div class="card-ui p-4 flex flex-col justify-center col-span-2 md:col-span-1 border-primary/20 bg-primary/5">
+                <span class="text-xs text-primary font-semibold uppercase tracking-wider mb-1">Balance</span>
+                <span id="dashBalance" class="text-2xl font-black">₹0</span>
+            </div>
+        </div>
+
+        <div class="card-ui border-destructive/30 bg-destructive/5 p-5 relative overflow-hidden">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 class="text-destructive font-bold flex items-center gap-2">
+                        <i data-lucide="flame" class="w-5 h-5"></i> Debt Annihilator
+                    </h3>
+                    <p class="text-sm text-foreground/80 font-medium mt-1">₹1.55 Lakh Target</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-xs text-muted-foreground">Remaining</span>
+                    <p id="debtRemainingText" class="font-bold text-foreground">₹1,55,000</p>
+                </div>
+            </div>
+            
+            <div class="h-3 w-full bg-background rounded-full overflow-hidden border mb-4">
+                <div id="debtProgressBar" class="h-full bg-destructive transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+
+            <div class="flex gap-2">
+                <input type="number" id="debtPaymentInput" placeholder="EMI Amount" class="input-ui bg-background">
+                <button onclick="logDebtPayment()" class="btn-ui btn-destructive shrink-0">Log</button>
+            </div>
+        </div>
+
+        <div class="card-ui p-5 space-y-4">
+            <h3 class="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Mindset Check</h3>
+            <div class="space-y-3" id="categoryBars">
+                </div>
+        </div>
+
+        <div class="card-ui p-0 overflow-hidden">
+            <div class="p-5 border-b flex justify-between items-center gap-4 bg-muted/30">
+                <h3 class="font-semibold shrink-0">Ledger</h3>
+                <div class="relative w-32 md:w-48">
+                    <span class="absolute left-3 top-2.5 text-muted-foreground font-medium"></span>
+                    <input type="number" id="incomeInput" oninput="updateIncome()" class="input-ui pl-7 font-bold">
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-muted-foreground uppercase bg-muted/50 border-b">
+                        <tr>
+                            <th class="px-4 py-3 font-medium">Details</th>
+                            <th class="px-4 py-3 font-medium text-right">Amount</th>
+                            <th class="px-4 py-3 font-medium text-center"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenseTableBody" class="divide-y">
+                        </tbody>
+                </table>
+            </div>
+            
+            <div class="p-4 bg-muted/10">
+                <button onclick="addExpenseRow()" class="btn-ui btn-outline w-full border-dashed">
+                    <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add Expense
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="backupModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 hidden flex justify-center items-end md:items-center p-4">
+        <div class="bg-card w-full max-w-md rounded-2xl border shadow-lg p-6 animate-in slide-in-from-bottom-4 md:zoom-in-95 duration-200">
+            <h2 class="text-lg font-bold mb-2">Data Management</h2>
+            <p class="text-sm text-muted-foreground mb-6">Securely backup your progress or restore from a previous file.</p>
+            
+            <div class="space-y-3">
+                <button onclick="executeBackup('drive')" class="btn-ui btn-primary w-full justify-between">
+                    <span>Download & Open GDrive</span>
+                    <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+                </button>
+                <button onclick="executeBackup('local')" class="btn-ui btn-outline w-full justify-between">
+                    <span>Just Download to Phone</span>
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                
+                <div class="relative py-3">
+                    <div class="absolute inset-0 flex items-center"><span class="w-full border-t"></span></div>
+                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-card px-2 text-muted-foreground font-bold">Restore Data</span></div>
+                </div>
+
+                <button onclick="openDriveForRestore()" class="btn-ui btn-outline w-full justify-between border-primary/20 hover:bg-primary/5">
+                    <span class="text-primary font-medium">1. Get File from GDrive</span>
+                    <i data-lucide="external-link" class="w-4 h-4 text-primary"></i>
+                </button>
+
+                <label class="btn-ui btn-ghost w-full border border-dashed cursor-pointer justify-between">
+                    <span>2. Select Backup File</span>
+                    <i data-lucide="folder-open" class="w-4 h-4"></i>
+                    <input type="file" accept=".json" class="hidden" onchange="importData(event)">
+                </label>
+                
+                <button onclick="closeBackupModal()" class="w-full mt-2 text-sm text-muted-foreground hover:text-foreground p-2">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Init Icons
+        lucide.createIcons();
+
+        // Core Data
+        const masterDebt = 155000;
+        let globalData = JSON.parse(localStorage.getItem('budgetApp_v4')) || {
+            theme: 'light',
+            totalDebtPaid: 0,
+            months: {
+                "Month 1 (Crisis)": {
+                    income: 30000,
+                    expenses: [
+                        { id: 1, date: "2026-03-01", name: "Dad's Surgery", cat: "need", amount: 10000 },
+                        { id: 2, date: "2026-03-05", name: "EMIs", cat: "debt", amount: 8000 },
+                        { id: 3, date: "2026-03-06", name: "Mom's Meds", cat: "need", amount: 2000 },
+                        { id: 4, date: "2026-03-30", name: "Machine Fund", cat: "save", amount: 4000 }
+                    ]
+                }
+            }
+        };
+
+        let currentMonth = Object.keys(globalData.months)[0];
+
+        // Theme
+        function applyTheme() {
+            if (globalData.theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.getElementById('themeIcon').setAttribute('data-lucide', 'sun');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
+            }
+            lucide.createIcons();
+        }
+
+        function toggleTheme() {
+            globalData.theme = globalData.theme === 'light' ? 'dark' : 'light';
+            saveData();
+            applyTheme();
+        }
+
+        // Modal Logic
+        function showBackupModal() { document.getElementById('backupModal').classList.remove('hidden'); }
+        function closeBackupModal() { document.getElementById('backupModal').classList.add('hidden'); }
+
+        // Backup & Restore Logic
+        function executeBackup(target) {
+            closeBackupModal();
+            
+            // 1. Download
+            const dataStr = JSON.stringify(globalData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const dateStr = new Date().toISOString().split('T')[0];
+            a.download = `TakeCharge_v4_${dateStr}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // 2. Open Drive if requested
+            if(target === 'drive' && GOOGLE_DRIVE_FOLDER_LINK !== "") {
+                setTimeout(() => { window.open(GOOGLE_DRIVE_FOLDER_LINK, '_blank'); }, 500);
+            } else if (target === 'drive') {
+                alert("Please add your Google Drive link in the HTML code to use this feature.");
+            }
+        }
+
+        function openDriveForRestore() {
+            if(GOOGLE_DRIVE_FOLDER_LINK !== "") {
+                window.open(GOOGLE_DRIVE_FOLDER_LINK, '_blank');
+            } else {
+                alert("Please add your Google Drive link in the HTML code (near the top) to use this feature.");
+            }
+        }
+
+        function importData(event) {
+            closeBackupModal();
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported && imported.months) {
+                        globalData = imported;
+                        currentMonth = Object.keys(globalData.months)[0];
+                        saveData(); applyTheme(); render();
+                        alert("Data successfully restored!");
+                    }
+                } catch (error) { alert("Invalid file format."); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function saveData() { localStorage.setItem('budgetApp_v4', JSON.stringify(globalData)); }
+
+        // Formatting Helper
+        const formatRupee = (num) => '₹' + Math.abs(num).toLocaleString('en-IN');
+
+        function render() {
+            // Dropdown
+            const selectEl = document.getElementById('monthSelect');
+            selectEl.innerHTML = '';
+            Object.keys(globalData.months).forEach(month => {
+                let option = document.createElement('option');
+                option.value = month; option.innerText = month;
+                if (month === currentMonth) option.selected = true;
+                selectEl.appendChild(option);
+            });
+
+            const data = globalData.months[currentMonth];
+            document.getElementById('incomeInput').value = data.income;
+
+            // Ledger
+            const tbody = document.getElementById('expenseTableBody');
+            tbody.innerHTML = '';
+            let totalExpenses = 0;
+            let catTotals = { need: 0, debt: 0, save: 0, want: 0 };
+            
+            // Map category to color scheme
+            const catColors = { need: 'text-blue-500', debt: 'text-destructive', save: 'text-success', want: 'text-warning' };
+
+            data.expenses.forEach((exp, index) => {
+                let amt = Number(exp.amount) || 0;
+                totalExpenses += amt;
+                if (catTotals[exp.cat] !== undefined) catTotals[exp.cat] += amt;
+
+                // Mobile optimized row layout
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-muted/50 transition-colors group";
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <div class="flex flex-col gap-1">
+                            <input type="text" value="${exp.name}" oninput="updateExp(${index}, 'name', this.value)" class="bg-transparent border-none p-0 font-medium focus:ring-0 text-sm placeholder:text-muted-foreground w-full" placeholder="Expense Name">
+                            <div class="flex items-center gap-2 text-xs">
+                                <input type="date" value="${exp.date}" oninput="updateExp(${index}, 'date', this.value)" class="bg-transparent border-none p-0 text-muted-foreground focus:ring-0 w-24">
+                                <select onchange="updateExp(${index}, 'cat', this.value)" class="bg-transparent border-none p-0 uppercase tracking-wider font-semibold focus:ring-0 ${catColors[exp.cat]} w-16 text-xs">
+                                    <option value="need" ${exp.cat === 'need' ? 'selected' : ''}>Need</option>
+                                    <option value="debt" ${exp.cat === 'debt' ? 'selected' : ''}>Debt</option>
+                                    <option value="save" ${exp.cat === 'save' ? 'selected' : ''}>Save</option>
+                                    <option value="want" ${exp.cat === 'want' ? 'selected' : ''}>Want</option>
+                                </select>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-3 align-top text-right">
+                        <input type="number" value="${exp.amount}" oninput="updateExp(${index}, 'amount', this.value)" class="bg-transparent border-none p-0 font-bold text-right focus:ring-0 w-full">
+                    </td>
+                    <td class="p-3 align-top text-center w-10">
+                        <button onclick="deleteExpense(${index})" class="text-muted-foreground hover:text-destructive p-1 rounded-md hover:bg-destructive/10">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+
+            // Analytics Update
+            const balance = data.income - totalExpenses;
+            document.getElementById('dashIncome').innerText = formatRupee(data.income);
+            document.getElementById('dashExpenses').innerText = formatRupee(totalExpenses);
+            
+            const dashBalEl = document.getElementById('dashBalance');
+            dashBalEl.innerText = (balance < 0 ? '-' : '') + formatRupee(balance);
+            dashBalEl.className = `text-2xl font-black ${balance < 0 ? 'text-destructive' : 'text-foreground'}`;
+
+            // Category Mindset Bars
+            let base = data.income > 0 ? data.income : (totalExpenses || 1); 
+            const catContainer = document.getElementById('categoryBars');
+            catContainer.innerHTML = '';
+            
+            const barConfigs = [
+                { id: 'need', label: 'Needs', color: 'bg-blue-500' },
+                { id: 'debt', label: 'Debt', color: 'bg-destructive' },
+                { id: 'save', label: 'Saving', color: 'bg-success' },
+                { id: 'want', label: 'Wants', color: 'bg-warning' }
+            ];
+
+            barConfigs.forEach(config => {
+                let pct = Math.min((catTotals[config.id] / base) * 100, 100).toFixed(1);
+                catContainer.innerHTML += `
+                    <div class="flex items-center gap-3 text-sm">
+                        <div class="w-14 font-medium text-muted-foreground">${config.label}</div>
+                        <div class="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                            <div class="h-full ${config.color}" style="width: ${pct}%"></div>
+                        </div>
+                        <div class="w-20 text-right font-bold">${formatRupee(catTotals[config.id])}</div>
+                    </div>
+                `;
+            });
+
+            // Debt Tracker Update
+            let paid = globalData.totalDebtPaid || 0;
+            let remaining = masterDebt - paid;
+            let debtPct = Math.min((paid / masterDebt) * 100, 100).toFixed(1);
+            
+            document.getElementById('debtRemainingText').innerText = formatRupee(Math.max(remaining, 0));
+            document.getElementById('debtProgressBar').style.width = debtPct + '%';
+
+            saveData();
+        }
+
+        // Action Functions
+        function changeMonth() { currentMonth = document.getElementById('monthSelect').value; render(); }
+        function createNewMonth() {
+            let newMonth = prompt("Enter new month name:");
+            if (newMonth && !globalData.months[newMonth]) {
+                globalData.months[newMonth] = { income: globalData.months[currentMonth].income, expenses: [] };
+                currentMonth = newMonth; render();
+            }
+        }
+        function updateIncome() { globalData.months[currentMonth].income = Number(document.getElementById('incomeInput').value); render(); }
+        
+        function updateExp(index, field, val) {
+            if(field === 'amount') globalData.months[currentMonth].expenses[index][field] = Number(val);
+            else globalData.months[currentMonth].expenses[index][field] = val;
+            if(field !== 'name' && field !== 'date') render(); 
+            else saveData();
+        }
+
+        function addExpenseRow() {
+            // Get current exact date in Amravati (IST) correctly formatted
+            let today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+            globalData.months[currentMonth].expenses.push({ id: Date.now(), date: today, name: "", cat: "need", amount: 0 });
+            render();
+        }
+
+        function deleteExpense(index) { globalData.months[currentMonth].expenses.splice(index, 1); render(); }
+
+        function logDebtPayment() {
+            let input = document.getElementById('debtPaymentInput');
+            let amt = Number(input.value);
+            if (amt > 0) {
+                globalData.totalDebtPaid = (globalData.totalDebtPaid || 0) + amt;
+                input.value = '';
+                render();
+            }
+        }
+
+        // Run Initialization
+        applyTheme();
+        render();
+    </script>
+</body>
+</html>
