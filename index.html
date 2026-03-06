@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ashutosh Budget App</title>
+    <title>Ashutosh Buget App</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -71,7 +71,6 @@
             body { @apply bg-background text-foreground antialiased selection:bg-primary/20; }
         }
 
-        /* shadcn style components */
         .card-ui { @apply rounded-xl border bg-card text-card-foreground shadow-sm; }
         .btn-ui { @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2; }
         .btn-primary { @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm; }
@@ -80,11 +79,9 @@
         .btn-destructive { @apply bg-destructive text-destructive-foreground hover:bg-destructive/90; }
         .input-ui { @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50; }
         
-        /* iPhone specific tweaks */
         input[type="date"]::-webkit-inner-spin-button, input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0; width: 100%; height: 100%; position: absolute; left: 0; top: 0; cursor: pointer; }
         .table-container { @apply w-full overflow-x-auto overflow-y-hidden rounded-md border; -webkit-overflow-scrolling: touch; }
         
-        /* Hide scrollbar for clean mobile look */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { @apply bg-muted-foreground/30 rounded-full; }
@@ -93,7 +90,7 @@
 <body class="pb-20">
 
     <script>
-        const GOOGLE_DRIVE_FOLDER_LINK = "Https://drive.google.com/drive/folders/1ubUjDIXyn9eS3xTb_y3ErpVT8MUpPE4D"; // <--- PASTE YOUR LINK HERE
+        const GOOGLE_DRIVE_FOLDER_LINK = "https://drive.google.com/drive/my-drive"; // <--- PASTE YOUR LINK HERE
     </script>
 
     <div class="max-w-3xl mx-auto p-4 space-y-6">
@@ -104,14 +101,19 @@
                 <button onclick="toggleTheme()" class="btn-ui btn-ghost px-2">
                     <i data-lucide="moon" id="themeIcon" class="w-5 h-5"></i>
                 </button>
-                <button onclick="showBackupModal()" class="btn-ui btn-outline px-3 shadow-sm">
-                    <i data-lucide="save" class="w-4 h-4 mr-2"></i> Backup
+                <button onclick="showBackupModal()" class="btn-ui btn-outline px-3 shadow-sm text-primary border-primary/30">
+                    <i data-lucide="cloud" class="w-4 h-4 mr-2"></i> Sync
                 </button>
             </div>
         </header>
 
         <div class="flex items-center justify-between">
-            <select id="monthSelect" onchange="changeMonth()" class="text-lg font-bold bg-transparent border-none focus:ring-0 p-0 pr-4 text-foreground"></select>
+            <div class="flex items-center gap-1">
+                <select id="monthSelect" onchange="changeMonth()" class="text-lg font-bold bg-transparent border-none focus:ring-0 p-0 pr-4 text-foreground"></select>
+                <button onclick="deleteCurrentMonth()" class="text-destructive/70 hover:text-destructive hover:bg-destructive/10 p-1.5 rounded-md transition-colors" title="Delete Month">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+            </div>
             <button onclick="createNewMonth()" class="btn-ui btn-ghost text-primary text-sm">
                 <i data-lucide="plus" class="w-4 h-4 mr-1"></i> New
             </button>
@@ -158,16 +160,29 @@
 
         <div class="card-ui p-5 space-y-4">
             <h3 class="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Mindset Check</h3>
-            <div class="space-y-3" id="categoryBars">
-                </div>
+            <div class="space-y-3" id="categoryBars"></div>
         </div>
 
         <div class="card-ui p-0 overflow-hidden">
-            <div class="p-5 border-b flex justify-between items-center gap-4 bg-muted/30">
+            <div class="p-5 border-b flex flex-wrap justify-between items-center gap-4 bg-muted/30">
                 <h3 class="font-semibold shrink-0">Ledger</h3>
-                <div class="relative w-32 md:w-48">
-                    <span class="absolute left-3 top-2.5 text-muted-foreground font-medium"></span>
-                    <input type="number" id="incomeInput" oninput="updateIncome()" class="input-ui pl-7 font-bold">
+                
+                <div class="flex items-center gap-2 flex-wrap">
+                    <select id="filterCategory" onchange="render()" class="input-ui h-8 py-1 px-2 text-xs w-auto min-w-[90px]">
+                        <option value="all">All Items</option>
+                        <option value="need">Needs</option>
+                        <option value="want">Wants</option>
+                        <option value="debt">Debt</option>
+                        <option value="save">Savings</option>
+                    </select>
+                    <button onclick="exportExcel()" class="btn-ui bg-[#107c41] hover:bg-[#0c5c30] text-white shadow-sm h-8 px-3 text-xs flex items-center gap-1.5 shrink-0 transition-transform active:scale-95" title="Export Formatted Excel">
+                        <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i> Export Excel
+                    </button>
+                </div>
+
+                <div class="relative w-32 md:w-48 ml-auto">
+                    <span class="absolute left-3 top-2.5 text-muted-foreground font-medium">₹</span>
+                    <input type="number" id="incomeInput" oninput="updateIncome()" class="input-ui pl-7 font-bold" placeholder="Income">
                 </div>
             </div>
             
@@ -196,33 +211,34 @@
 
     <div id="backupModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 hidden flex justify-center items-end md:items-center p-4">
         <div class="bg-card w-full max-w-md rounded-2xl border shadow-lg p-6 animate-in slide-in-from-bottom-4 md:zoom-in-95 duration-200">
-            <h2 class="text-lg font-bold mb-2">Data Management</h2>
-            <p class="text-sm text-muted-foreground mb-6">Securely backup your progress or restore from a previous file.</p>
+            <h2 class="text-lg font-bold mb-2">Cloud Sync Hub</h2>
+            <p class="text-sm text-muted-foreground mb-6">Push your data to Google Sheets to save it, or pull it down to restore.</p>
             
             <div class="space-y-3">
-                <button onclick="executeBackup('drive')" class="btn-ui btn-primary w-full justify-between">
-                    <span>Download & Open GDrive</span>
+                <button id="cloudSyncBtn" onclick="pushToCloud()" class="btn-ui btn-primary w-full justify-between shadow-sm">
+                    <span>1. Push to Cloud (Save)</span>
                     <i data-lucide="cloud-upload" class="w-4 h-4"></i>
                 </button>
-                <button onclick="executeBackup('local')" class="btn-ui btn-outline w-full justify-between">
-                    <span>Just Download to Phone</span>
-                    <i data-lucide="download" class="w-4 h-4"></i>
+
+                <button id="cloudPullBtn" onclick="pullFromCloud()" class="btn-ui btn-outline border-primary/30 text-primary hover:bg-primary/5 w-full justify-between">
+                    <span>2. Pull from Cloud (Load)</span>
+                    <i data-lucide="cloud-download" class="w-4 h-4"></i>
                 </button>
                 
                 <div class="relative py-3">
                     <div class="absolute inset-0 flex items-center"><span class="w-full border-t"></span></div>
-                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-card px-2 text-muted-foreground font-bold">Restore Data</span></div>
+                    <div class="relative flex justify-center text-xs uppercase"><span class="bg-card px-2 text-muted-foreground font-bold">Local Fallback</span></div>
                 </div>
 
-                <button onclick="openDriveForRestore()" class="btn-ui btn-outline w-full justify-between border-primary/20 hover:bg-primary/5">
-                    <span class="text-primary font-medium">1. Get File from GDrive</span>
-                    <i data-lucide="external-link" class="w-4 h-4 text-primary"></i>
+                <button onclick="executeLocalBackup()" class="btn-ui btn-ghost w-full justify-between border border-dashed">
+                    <span class="text-muted-foreground">Download File to Phone</span>
+                    <i data-lucide="download" class="w-4 h-4 text-muted-foreground"></i>
                 </button>
 
-                <label class="btn-ui btn-ghost w-full border border-dashed cursor-pointer justify-between">
-                    <span>2. Select Backup File</span>
-                    <i data-lucide="folder-open" class="w-4 h-4"></i>
-                    <input type="file" accept=".json" class="hidden" onchange="importData(event)">
+                <label class="btn-ui btn-ghost w-full justify-between border border-dashed cursor-pointer">
+                    <span class="text-muted-foreground">Restore from File</span>
+                    <i data-lucide="folder-open" class="w-4 h-4 text-muted-foreground"></i>
+                    <input type="file" accept=".json" class="hidden" onchange="importLocalData(event)">
                 </label>
                 
                 <button onclick="closeBackupModal()" class="w-full mt-2 text-sm text-muted-foreground hover:text-foreground p-2">Cancel</button>
@@ -234,27 +250,29 @@
         // Init Icons
         lucide.createIcons();
 
-        // Core Data
+        // ---------------------------------------------------------
+        // 1. CLOUD API SETUP
+        // ---------------------------------------------------------
+        const SCRIPT_URL = "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE"; 
+        
+        // ---------------------------------------------------------
+        // 2. CORE DATA
+        // ---------------------------------------------------------
         const masterDebt = 155000;
-        let globalData = JSON.parse(localStorage.getItem('budgetApp_v4')) || {
+        let globalData = JSON.parse(localStorage.getItem('budgetApp_v8')) || {
             theme: 'light',
             totalDebtPaid: 0,
             months: {
-                "March 2026": {
-                    income: 30000,
-                    expenses: [
-                        { id: 1, date: "2026-03-01", name: "Dad's Surgery", cat: "need", amount: 10000 },
-                        { id: 2, date: "2026-03-05", name: "EMIs", cat: "debt", amount: 8000 },
-                        { id: 3, date: "2026-03-06", name: "Mom's Meds", cat: "need", amount: 2000 },
-                        { id: 4, date: "2026-03-30", name: "Machine Fund", cat: "save", amount: 4000 }
-                    ]
+                "Current Month": {
+                    income: 0,
+                    expenses: []
                 }
             }
         };
 
         let currentMonth = Object.keys(globalData.months)[0];
 
-        // Theme
+        // --- Theme ---
         function applyTheme() {
             if (globalData.theme === 'dark') {
                 document.documentElement.classList.add('dark');
@@ -272,44 +290,85 @@
             applyTheme();
         }
 
-        // Modal Logic
+        // --- Modal Logic ---
         function showBackupModal() { document.getElementById('backupModal').classList.remove('hidden'); }
         function closeBackupModal() { document.getElementById('backupModal').classList.add('hidden'); }
 
-        // Backup & Restore Logic
-        function executeBackup(target) {
+        // --- Google Sheets Cloud Engine ---
+        async function pushToCloud() {
+            if (SCRIPT_URL === "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE" || SCRIPT_URL === "") {
+                alert("Please paste your Google Apps Script URL in the HTML code first!");
+                return;
+            }
+            try {
+                let btn = document.getElementById('cloudSyncBtn');
+                let originalContent = btn.innerHTML;
+                btn.innerHTML = `<span>Syncing to Google...</span>`;
+                
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(globalData),
+                    mode: 'no-cors' 
+                });
+                
+                alert("✅ Successfully synced to Google Sheets!");
+                closeBackupModal();
+                btn.innerHTML = originalContent;
+            } catch (error) {
+                alert("❌ Sync failed. Check your internet connection.");
+                closeBackupModal();
+            }
+        }
+
+        async function pullFromCloud() {
+            if (SCRIPT_URL === "PASTE_YOUR_GOOGLE_WEB_APP_URL_HERE" || SCRIPT_URL === "") {
+                alert("Please paste your Google Apps Script URL in the HTML code first!");
+                return;
+            }
+            try {
+                let btn = document.getElementById('cloudPullBtn');
+                let originalContent = btn.innerHTML;
+                btn.innerHTML = `<span>Loading from Cloud...</span>`;
+                
+                const response = await fetch(SCRIPT_URL);
+                const cloudData = await response.json();
+                
+                if (cloudData && cloudData.months) {
+                    globalData = cloudData;
+                    currentMonth = Object.keys(globalData.months)[0];
+                    saveData();
+                    applyTheme();
+                    document.getElementById('filterCategory').value = 'all';
+                    render();
+                    alert("☁️ Data successfully loaded from Google Sheets!");
+                } else {
+                    alert("No valid data found in Google Sheets.");
+                }
+                closeBackupModal();
+                btn.innerHTML = originalContent;
+            } catch (error) {
+                alert("❌ Load failed. Ensure you have synced data first.");
+                closeBackupModal();
+            }
+        }
+
+        // --- Local Backup Fallback ---
+        function executeLocalBackup() {
             closeBackupModal();
-            
-            // 1. Download
             const dataStr = JSON.stringify(globalData, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             const dateStr = new Date().toISOString().split('T')[0];
-            a.download = `TakeCharge_v4_${dateStr}.json`;
+            a.download = `TakeCharge_Backup_${dateStr}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-
-            // 2. Open Drive if requested
-            if(target === 'drive' && GOOGLE_DRIVE_FOLDER_LINK !== "") {
-                setTimeout(() => { window.open(GOOGLE_DRIVE_FOLDER_LINK, '_blank'); }, 500);
-            } else if (target === 'drive') {
-                alert("Please add your Google Drive link in the HTML code to use this feature.");
-            }
         }
 
-        function openDriveForRestore() {
-            if(GOOGLE_DRIVE_FOLDER_LINK !== "") {
-                window.open(GOOGLE_DRIVE_FOLDER_LINK, '_blank');
-            } else {
-                alert("Please add your Google Drive link in the HTML code (near the top) to use this feature.");
-            }
-        }
-
-        function importData(event) {
+        function importLocalData(event) {
             closeBackupModal();
             const file = event.target.files[0];
             if (!file) return;
@@ -321,7 +380,7 @@
                         globalData = imported;
                         currentMonth = Object.keys(globalData.months)[0];
                         saveData(); applyTheme(); render();
-                        alert("Data successfully restored!");
+                        alert("Data successfully restored from file!");
                     }
                 } catch (error) { alert("Invalid file format."); }
             };
@@ -329,13 +388,111 @@
             event.target.value = '';
         }
 
-        function saveData() { localStorage.setItem('budgetApp_v4', JSON.stringify(globalData)); }
-
-        // Formatting Helper
+        function saveData() { localStorage.setItem('budgetApp_v8', JSON.stringify(globalData)); }
         const formatRupee = (num) => '₹' + Math.abs(num).toLocaleString('en-IN');
 
+        // ---------------------------------------------------------
+        // EXPORT FORMATTED EXCEL ENGINE
+        // ---------------------------------------------------------
+        function exportExcel() {
+            const data = globalData.months[currentMonth];
+            if (!data.expenses || data.expenses.length === 0) {
+                alert("No expenses to export for this month.");
+                return;
+            }
+
+            // Summarize data for the Excel Header
+            let totalIncome = Number(data.income) || 0;
+            let totalSpent = 0;
+            let totalSavings = 0;
+            let totalAllOutflows = 0;
+
+            data.expenses.forEach(e => {
+                let amt = Number(e.amount) || 0;
+                totalAllOutflows += amt;
+                if(e.cat === 'save') {
+                    totalSavings += amt;
+                } else {
+                    totalSpent += amt;
+                }
+            });
+            let balance = totalIncome - totalAllOutflows;
+
+            // Generate an HTML table structure that Excel natively reads
+            let excelHTML = `
+                <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+                <head><meta charset="UTF-8"></head>
+                <body>
+                    <table border="1" cellpadding="5" cellspacing="0">
+                        <tr>
+                            <th colspan="4" style="background-color: #f3f4f6; font-size: 18px; font-weight: bold; text-align: center;">Financial Report: ${currentMonth}</th>
+                        </tr>
+                        <tr><td colspan="4"></td></tr>
+                        
+                        <tr>
+                            <td colspan="2" style="font-weight: bold;">Total Income:</td>
+                            <td colspan="2" style="font-weight: bold; color: #107c41;">₹${totalIncome}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="font-weight: bold;">Total Spent (Needs/Wants/Debt):</td>
+                            <td colspan="2" style="font-weight: bold; color: #d13438;">₹${totalSpent}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="font-weight: bold;">Total Saved:</td>
+                            <td colspan="2" style="font-weight: bold; color: #107c41;">₹${totalSavings}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="font-weight: bold; background-color: #f3f4f6;">Remaining Balance:</td>
+                            <td colspan="2" style="font-weight: bold; background-color: #f3f4f6; color: ${balance < 0 ? '#d13438' : '#107c41'};">₹${balance}</td>
+                        </tr>
+                        
+                        <tr><td colspan="4"></td></tr>
+                        
+                        <tr style="background-color: #e5e7eb; font-weight: bold; text-align: left;">
+                            <td>Date</td>
+                            <td>Expense Name</td>
+                            <td>Category</td>
+                            <td>Amount</td>
+                        </tr>
+            `;
+
+            // Loop through rows and color code
+            data.expenses.forEach(e => {
+                let cleanName = e.name ? e.name.replace(/</g, '&lt;').replace(/>/g, '&gt;') : "";
+                let catText = e.cat ? e.cat.toUpperCase() : "";
+                
+                // Green for Save, Red for anything else
+                let amountColor = (e.cat === 'save') ? '#107c41' : '#d13438'; 
+
+                excelHTML += `
+                        <tr>
+                            <td>${e.date}</td>
+                            <td>${cleanName}</td>
+                            <td>${catText}</td>
+                            <td style="color: ${amountColor}; font-weight: bold;">₹${e.amount || 0}</td>
+                        </tr>
+                `;
+            });
+
+            excelHTML += `
+                    </table>
+                </body>
+                </html>
+            `;
+
+            // Convert to Blob and Download as .xls
+            const blob = new Blob([excelHTML], { type: 'application/vnd.ms-excel' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `TakeCharge_${currentMonth.replace(/ /g, "_")}.xls`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- Render UI ---
         function render() {
-            // Dropdown
             const selectEl = document.getElementById('monthSelect');
             selectEl.innerHTML = '';
             Object.keys(globalData.months).forEach(month => {
@@ -346,23 +503,31 @@
             });
 
             const data = globalData.months[currentMonth];
-            document.getElementById('incomeInput').value = data.income;
+            document.getElementById('incomeInput').value = data.income || '';
 
-            // Ledger
-            const tbody = document.getElementById('expenseTableBody');
-            tbody.innerHTML = '';
+            // Calculations
             let totalExpenses = 0;
             let catTotals = { need: 0, debt: 0, save: 0, want: 0 };
             
-            // Map category to color scheme
-            const catColors = { need: 'text-blue-500', debt: 'text-destructive', save: 'text-success', want: 'text-warning' };
-
-            data.expenses.forEach((exp, index) => {
+            data.expenses.forEach((exp) => {
                 let amt = Number(exp.amount) || 0;
                 totalExpenses += amt;
                 if (catTotals[exp.cat] !== undefined) catTotals[exp.cat] += amt;
+            });
 
-                // Mobile optimized row layout
+            // Ledger Output
+            const tbody = document.getElementById('expenseTableBody');
+            tbody.innerHTML = '';
+            
+            const catColors = { need: 'text-blue-500', debt: 'text-destructive', save: 'text-success', want: 'text-warning' };
+            const filterVal = document.getElementById('filterCategory').value;
+
+            let visibleCount = 0;
+
+            data.expenses.forEach((exp, index) => {
+                if (filterVal !== 'all' && exp.cat !== filterVal) return;
+                visibleCount++;
+
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-muted/50 transition-colors group";
                 tr.innerHTML = `
@@ -381,7 +546,7 @@
                         </div>
                     </td>
                     <td class="p-3 align-top text-right">
-                        <input type="number" value="${exp.amount}" oninput="updateExp(${index}, 'amount', this.value)" class="bg-transparent border-none p-0 font-bold text-right focus:ring-0 w-full">
+                        <input type="number" value="${exp.amount || ''}" oninput="updateExp(${index}, 'amount', this.value)" class="bg-transparent border-none p-0 font-bold text-right focus:ring-0 w-full" placeholder="0">
                     </td>
                     <td class="p-3 align-top text-center w-10">
                         <button onclick="deleteExpense(${index})" class="text-muted-foreground hover:text-destructive p-1 rounded-md hover:bg-destructive/10">
@@ -391,6 +556,11 @@
                 `;
                 tbody.appendChild(tr);
             });
+            
+            if(visibleCount === 0 && data.expenses.length > 0) {
+                 tbody.innerHTML = `<tr><td colspan="3" class="text-center p-4 text-muted-foreground text-sm">No expenses match this filter.</td></tr>`;
+            }
+
             lucide.createIcons();
 
             // Analytics Update
@@ -438,15 +608,34 @@
             saveData();
         }
 
-        // Action Functions
+        // --- Action Functions ---
         function changeMonth() { currentMonth = document.getElementById('monthSelect').value; render(); }
+        
         function createNewMonth() {
-            let newMonth = prompt("Enter new month name:");
+            let newMonth = prompt("Enter new month name (e.g., April 2026):");
             if (newMonth && !globalData.months[newMonth]) {
                 globalData.months[newMonth] = { income: globalData.months[currentMonth].income, expenses: [] };
-                currentMonth = newMonth; render();
+                currentMonth = newMonth; 
+                document.getElementById('filterCategory').value = 'all';
+                render();
             }
         }
+
+        function deleteCurrentMonth() {
+            const monthKeys = Object.keys(globalData.months);
+            if (monthKeys.length <= 1) {
+                alert("You cannot delete your only month. Create a new one first.");
+                return;
+            }
+            if (confirm(`Are you absolutely sure you want to delete all data for ${currentMonth}?`)) {
+                delete globalData.months[currentMonth];
+                currentMonth = Object.keys(globalData.months)[0]; 
+                document.getElementById('filterCategory').value = 'all';
+                saveData();
+                render();
+            }
+        }
+
         function updateIncome() { globalData.months[currentMonth].income = Number(document.getElementById('incomeInput').value); render(); }
         
         function updateExp(index, field, val) {
@@ -457,9 +646,9 @@
         }
 
         function addExpenseRow() {
-            // Get current exact date in Amravati (IST) correctly formatted
             let today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
             globalData.months[currentMonth].expenses.push({ id: Date.now(), date: today, name: "", cat: "need", amount: 0 });
+            document.getElementById('filterCategory').value = 'all'; 
             render();
         }
 
@@ -475,7 +664,7 @@
             }
         }
 
-        // Run Initialization
+        // --- Run Initialization ---
         applyTheme();
         render();
     </script>
