@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ashutosh's Budget App</title>
+    <title>Ashutosh Budget App</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -240,6 +240,15 @@
             theme: 'light',
             totalDebtPaid: 0,
             months: {
+                "Month 1 (Crisis)": {
+                    income: 30000,
+                    expenses: [
+                        { id: 1, date: "2026-03-01", name: "Dad's Surgery", cat: "need", amount: 10000 },
+                        { id: 2, date: "2026-03-05", name: "EMIs", cat: "debt", amount: 8000 },
+                        { id: 3, date: "2026-03-06", name: "Mom's Meds", cat: "need", amount: 2000 },
+                        { id: 4, date: "2026-03-30", name: "Machine Fund", cat: "save", amount: 4000 }
+                    ]
+                }
             }
         };
 
